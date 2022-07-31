@@ -20,8 +20,6 @@ Our adapted diary_preprocess_lite repository is meant to be run in the FASSE clu
 2. [AUDIO QC](#audio)
 	- [Run automated audio QC pipeline](#autoaudio)
 	- [Analyze automated audio QC metrics to identifying empty, invalid, and late diaries](#analyzeaudio)
-	- [Transcript Processing Details](#transcript)
-	- [Visualization Generation Details](#viz)
 3. [TRANSCRIPT QC](#transcriptQC)
 	- [Manual spot-checking and editing of subset of transcripts](#manualtrans)
 	- [Run automated transcript QC pipeline](#autotrans)
