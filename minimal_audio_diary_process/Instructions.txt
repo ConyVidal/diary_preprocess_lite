@@ -1,0 +1,35 @@
+Make sure your encryption module is loaded and the python stuff from the audio diary code is not loaded, then you can run:
+
+bash run_new_audio_decryption.sh
+
+It will ask you to type in which patient ID you want to do the decryption for, and then will also securely read in the decryption password. It will then decrypt all the files for that patient into a temp_decrypt folder under that patient's PROTECTED phone processed audio folder. These files are not yet renamed though.
+
+
+Once that is done for a given patient you can load the python environment mentioned in the code README, and run:
+
+bash run_audio_metadata.sh
+
+That will again ask you to type in the patient ID, and then it should both rename the decrypted files and create the metadata CSV for the patient. The metadata CSV maps the raw filepath to various info including the assigned date, study day number (based on patient consent), and submission hour, all of which use the 6 AM cutoff and ET conversion mentioned. It also includes the recording number though, and then this is what I used for renaming the audio files instead of day number so it will be easier to backtrack if there is any possible confusion with multiple submissions (it is no longer restricted to 1 per day), changes in timezone, etc. 
+
+The created [study]_[subject]_phoneAudioDiary_fileMetadataMap.csv under the patient's PROTECTED phone processed audio folder is what you would want to then edit to reflect the timezone differences. You can use the raw filepath column to figure out what the corresponding GPS file would be I believe. Then you would want to adjust submission hour from ET to the real timezone, adjusting the assigned date + study day if the submission hour is no longer in range. Note the Eastern Time submission hour I encode as 6 to 29 (instead of the normal 0 to 23) to reflect that our day really starts at 6 AM. Since the recordings themselves are no longer renamed with day number though this isn't as urgent TODO, you could move ahead to the next step for now and revisit this later.
+
+
+After the metadata is done you can similarly run:
+
+bash run_audio_qc.sh
+
+Which will do the same thing asking for patient ID. It will create a CSV under the patient's PROTECTED phone processed audio folder that maps each decrypted filename to its basic audio stats. It will also try to save a combined CSV that merges the metadata above with the audio stats, so if the metadata isn't adjusted yet this CSV would have the ET-based day assignment too (but it wouldn't be hard to re-merge later so not something to worry about, just be aware of). Finally, it creates a subfolder in the temporary decryption folder called low_db, where all the files found to have less than 40 db should be moved to.
+
+At this point you would want to download the PHOENIX/PROTECTED/[study]/[subject]/phone/processed/audio folder I think to take a look at the particular subject ID's outputs and do the TranscribeMe upload. I didn't build in any auto deletion here so once you are done with that you would have to delete the temp_decrypt subfolder yourself from the server
+
+
+Then obviously you would restart the process for the next patient. At the end (or at any time in the middle if you want an intermediate picture) you can run:
+
+bash run_distribution_comp.sh
+
+And it will prompt you for a path to an output folder, in which it should put a combined CSV containing all the relevant metadata/QC info compiled so far across patients and a PDF containing histograms of the full distribution for the QC features. 
+
+
+5/2 Update:
+For running on additional studies, all 4 bash scripts now ask for study name. Because they access raw, run_new_audio_decryption.sh and run_audio_metadata.sh also now ask for whether Beiwe categorizes the audio diaries under audio_recordings or voiceRecording. To use the pipeline with a study that encrypts using cryptease instead of the old encrypt module, just make sure that the old encrypt module is not loaded, and then load the python environment mentioned in the repo (which should already have cryptease installed) before doing even the first step. 
+
