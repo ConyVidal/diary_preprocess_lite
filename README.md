@@ -89,18 +89,18 @@ Below I outline the steps I took to quality control all the available audio diar
 The minimal_audio_diary_process module of the diary_preprocess_lite repository was run for each subject in both the FRESH_17 and FRESH17_FOLLOWUP studies. This lite version of the pipeline (adapted with help from Michaela Ennis) implements 3 main scripts in the original process_audio_diary pipeline, which work over a given subject’s audio files sequentially to complete the following three tasks:
 
 **Step 1: Audio file decryption**
-    + Script name: run_new_audio_decryption.sh
-    + The script will proceed to decrypt all audio files (.wav.lock extension) in `/ncf/cnl03/PHOENIX/PROTECTED/FRESH_17/*subject*/phone/raw/*/voiceRecording/*` and place them in `/ncf/cnl03/PHOENIX/PROTECTED/*study*/*subject*/phone/processed/audio/temp_decrypted`. Terminal won’t show progress, but the user can refresh the folder on a separate terminal shell or in FASSEood to check it’s working. Once all files are decrypted for that subject, the user should check that they got the expected number of files decrypted (cross-check with the raw encrypted files). If everything looks good, we can proceed to producing metadata files (see below).
+* Script name: run_new_audio_decryption.sh
+* The script will proceed to decrypt all audio files (.wav.lock extension) in `/ncf/cnl03/PHOENIX/PROTECTED/FRESH_17/*subject*/phone/raw/*/voiceRecording/*` and place them in `/ncf/cnl03/PHOENIX/PROTECTED/*study*/*subject*/phone/processed/audio/temp_decrypted`. Terminal won’t show progress, but the user can refresh the folder on a separate terminal shell or in FASSEood to check it’s working. Once all files are decrypted for that subject, the user should check that they got the expected number of files decrypted (cross-check with the raw encrypted files). If everything looks good, we can proceed to producing metadata files (see below).
 
 **Step 2: File renaming and metadata extraction**
-    + Script name: run_audio_metadata.sh
-    + First, it renames the audio files (from their original name which is just the submission timestamp in UTC time, per Beiwe’s default settings) to include study ID, subject ID, and file number (numbering is done based on all available files for that subject, ordered by submission timestamp). The files are kept in the same location.
-    + Subsequently, it creates metadata files with original names of files, new name, and path to original file in PHOENIX. I use this path at a later step when adjusting for timezone. These files are saved in `/ncf/cnl03/PHOENIX/PROTECTED/*study*/*subject*/phone/processed/audio/FRESH_17_SUBJECT_phoneAudioDiary_fileMetadataMap.csv`.
-    + Once the script is done, the user should check that they have the right number of files and that the file naming didn’t skip any numbers before proceeding to the next step.
+* Script name: run_audio_metadata.sh
+* First, it renames the audio files (from their original name which is just the submission timestamp in UTC time, per Beiwe’s default settings) to include study ID, subject ID, and file number (numbering is done based on all available files for that subject, ordered by submission timestamp). The files are kept in the same location.
+* Subsequently, it creates metadata files with original names of files, new name, and path to original file in PHOENIX. I use this path at a later step when adjusting for timezone. These files are saved in `/ncf/cnl03/PHOENIX/PROTECTED/*study*/*subject*/phone/processed/audio/FRESH_17_SUBJECT_phoneAudioDiary_fileMetadataMap.csv`.
+* Once the script is done, the user should check that they have the right number of files and that the file naming didn’t skip any numbers before proceeding to the next step.
 
 **Step 3: Basic audio QC metrics computation**
-    + Script name: run_audio_qc.sh
-    + Computes basic QC stats on each audio file: length of file, acoustic volume, amplitude, etc., and compile them all into a CSV under `/ncf/cnl03/PHOENIX/PROTECTED/*study*/*subject*/phone/processed/audio/FRESH_17_SUBJECT_phoneAudioDiary_QC.csv`.
+* Script name: run_audio_qc.sh
+* Computes basic QC stats on each audio file: length of file, acoustic volume, amplitude, etc., and compile them all into a CSV under `/ncf/cnl03/PHOENIX/PROTECTED/*study*/*subject*/phone/processed/audio/FRESH_17_SUBJECT_phoneAudioDiary_QC.csv`.
 
 
 ##### Run automated audio QC pipeline <a name="autoaudio"></a>
