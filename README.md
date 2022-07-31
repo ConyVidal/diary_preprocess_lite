@@ -21,7 +21,7 @@ Our adapted diary_preprocess_lite repository is meant to be run in the FASSE clu
 	- [Run automated audio QC pipeline](#autoaudio)
 	- [Analyze automated audio QC metrics to identifying empty, invalid, and late diaries](#analyzeaudio)
 3. [TRANSCRIPT QC](#transcriptQC)
-	- [Manual spot-checking and editing of subset of transcripts](#manualtrans)
+	- [Manual spot-checking and editing subset of transcripts](#manualtrans)
 	- [Run automated transcript QC pipeline](#autotrans)
 	- [Analyze transcript QC pipeline outputs to identify potentially problematic transcripts](#analyzetrans)
 	
@@ -206,7 +206,7 @@ Audio files that passed all QC metrics above were submitted to the TranscribeMe 
 
 Once we get the transcripts back from TranscribeMe (this can take from a few business days to a few weeks), we run quality control checks over the transcriptions. This involves both manual and automated QC processing. 
 
-#### Manual spot-checking and editing of subset of transcripts <a name="manualtrans"></a>
+#### Manual spot-checking and editing subset of transcripts <a name="manualtrans"></a>
 
 This step focuses on assessing the accuracy of the transcriptions received from TranscribeMe and identifying any corrections we want to ask of TranscribeMe. For instance, if we notice a repeated pattern of mistakes, we want to catch that early so we can ask them to correct it moving forward, before we send more data.
 
@@ -318,12 +318,12 @@ Timeseries plots for quality inspection
 
 The **3_DIARIES_transcript_NLP_QC_viz.R** script compiles output files from the audio QC, transcript QC, and NLP features part of the pipeline and generates subject-level timeseries plots, as well as correlation plots, of a subset of features that we use to identify problematic files. Specifically, one subject at a time, we inspect the timeseries plots paying special attention to deviations in the following metrics:
 
-Number of observations included in the plot. It should be the same as the number of transcripts we uploaded to the cluster.
+* Number of observations included in the plot. This should be the same as the number of transcripts we uploaded to the cluster.
 * Volume: Note the “quietest” diary (lowest volume) – is the audio file still audible? Does it include prolonged moments of silence?
 * Word count: What is the lowest word count of any transcript? Does this diary contain any prolonged moments of silence or any technical glitches? 
 * Speaking rate: Any implausibly fast (higher number) speaking rates? Could this be due to errors in the sentence-level timestamps? E.g., sometimes the transcribers will erroneously assign the same timestamp to two consecutive sentences, or two sentences will show only a few milliseconds difference, even though the subject spoke a full sentence. If a timestamp error is noticed, it should be manually fixed and noted in the transcript_QC_log.xls.
-* Inaudible: Identify outliers in number of inaudible marks by using the subject’s full distribution of inaudible marks (Q3 + 1.5*IQR). Any file that qualifies as outlier following this formula should be reviewed—check the transcription against the audio file and try to fix as many inaudible marks as possible. Any file that was inspected and edited should be noted in transcript_QC_log.xls.
-* Number of speakers: Each diary should only contain the voice of the participant. Sometimes a diary will contain dialogue from a person other than the participant. Sometimes it’s background noise/voice of someone passing by, and sometimes it is evidence of the participant recording the diary while in the company of other people, which participants were instructed not to do. This happens very rarely. 
+* Inaudible: Identify high number of inaudible marks. For subjects with transcripts that have five or more inaudibles, I manually checked transcripts that represented an outlier in the number of inaudibles based on the subject’s full distribution of inaudible marks (Q3 + 1.5*IQR). I checked these transcription against the original audio files and tried to fix as many inaudible marks as possible. Any file that was inspected and edited was noted in transcript_QC_log.xls.
+* Number of speakers: Each diary should only contain the voice of the participant. Sometimes a diary will contain dialogue from a person other than the participant. Sometimes it’s background noise/voice of someone passing by, and sometimes it is evidence of the participant recording the diary while in the company of other people, which participants were instructed not to do. This happens very rarely. Make note of all diaries with more than one speaker in transcript_QC_log.xls.
 
 All files that were manually inspected based on the observations above should be noted in transcript_QC_log.xls, including notes on any edits that were made.
 
