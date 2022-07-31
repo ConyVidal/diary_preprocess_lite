@@ -34,19 +34,19 @@ For convenience, diary_preprocess_lite simply inherited the setup process from t
 
 3. We will need miniconda and a few other packages to create the conda environment that contains all the dependencies for the pipeline to run smoothly. Load those packages by running the following three lines on Terminal:
 
-    module load centos6/0.0.1-fasrc01
+    `module load centos6/0.0.1-fasrc01
     module load ncf/1.0.0-fasrc01
-    module load miniconda3/4.5.12-ncf
+    module load miniconda3/4.5.12-ncf`
 
 
 4. Create the Python conda environment ("audio_process") necessary to run this pipeline by moving to the setup folder and running:
 
-    conda env create -f audio_process.yml
+    `conda env create -f audio_process.yml`
 
 
 5. To activate the environment, which should be done each time before running the code, use:
 
-    conda activate audio_process
+    `conda activate audio_process`
 
 Note that before the first time running on a new machine, it may be necessary to start Python (in the activated conda environment) and enter the following two commands, in order for the NLP features script to work:
 
