@@ -1,12 +1,12 @@
 # diary_preprocess_lite
 
-This repository contains code and instructions to preprocess audio diaries collected as part of larger deep phenotyping studies in the Cognitive Neuroscience Laboratory at Harvard University (PI: Buckner). All code was adapted from [Michaela Ennis’ process_audio_diary repository](https://github.com/dptools/process_audio_diary) with help from Michaela Ennis and Jennie Li. 
+This repository contains instructions and code to preprocess voice diaries collected as part of larger deep phenotyping studies in the Cognitive Neuroscience Laboratory at Harvard University (PI: Buckner). Constanza M. Vidal Bustamante led the preprocessing of these voice diaries and wrote the instructions in this README file. All bash and python scripts were adapted from [Michaela Ennis’ process_audio_diary repository](https://github.com/dptools/process_audio_diary) with help from Michaela Ennis and Jennie Li. All R scripts for analysis and visualization were developed by Constanza M. Vidal Bustamante.
 
-Participants of the FRESH_17 and FRESH17_FOLLOWUP studies used the smartphone app Beiwe to record and submit daily voice diaries. These audio recordings are saved under the PROTECTED/phone/raw folder in the PHOENIX partition of ncf.
+Participants of the FRESH_17 and FRESH17_FOLLOWUP studies used the smartphone app Beiwe to record and submit daily voice diaries for an academic year or three months, respectively. These audio files are saved under the PROTECTED/phone/raw folder in the PHOENIX partition of ncf.
 
 Quality control processing for voice diaries includes two main steps: audio file QC (main goal is to filter out unusable files before we send for transcription) and transcript QC (main goal is to ensure accuracy of the transcription). Each of these steps, in turn, includes manual and automated components. 
 
-For the automated components, we adapted the dptools / process_audio_diary pipeline created and used in-house by members of the Baker Lab (main developer: Michaela Ennis) at McLean Hospital, which they use to QC their patients’ daily diaries as well as recorded therapy sessions. 
+Manual preprocessing components were determined by Constanza M. Vidal Bustamante following discussion with Michaela Ennis and Randy Buckner. For the automated components, we adapted the dptools / process_audio_diary pipeline created and used in-house by members of the Baker Lab (main developer: Michaela Ennis) at McLean Hospital, which they use to QC their patients’ daily diaries as well as recorded therapy sessions. 
 
 Our adapted diary_preprocess_lite repository is meant to be run in the FASSE cluster, and contains two sub-repositories: 
 * minimal_audio_diary_process: This repo is a "light" version of the audio QC part of the original process_audio_diary pipeline, focusing on computing metrics of file length, mean volume, and flatness.
@@ -219,12 +219,12 @@ If all expected transcripts have been received, make two copies of the received 
 1. Save a copy of the raw transcripts as downloaded from TranscribeMe server in (regularly backed-up) local computer. These will not be touched again.
 2. Save a second copy of the transcripts in local computer, under study folder/data. These files will be edited as part of the spot-checking process described below, and will then be uploaded to the cluster.
 
-*Spot-check* multiple transcripts (~30) for each subject, distributed across the study period (i.e., not just the first 30, but sampling in the beginning, middle, and end of study) against the original audio files and assess general accuracy. Mistakes to watch out for include:
+**Spot-check** multiple transcripts (~20) for each subject, distributed across the study period (i.e., not just the first 20, but sampling in the beginning, middle, and end of study) against the original audio files and assess general accuracy. Mistakes to watch out for include:
 * False "hits": Includes wrong words/sentences without any inaudible/questionable/redacted marks
 * False "misses": Includes inaudible/questionable marks but you can actually tell what the participant is saying in the audio file
 * Timestamp errors: You might notice two sentences have the same timestamp (this is rare, and should be picked up in automated QC, so no need to look too closely)
 
-*Edit any discrepancies* noticed in those ~30 files, and keep record of these checks and edits in the transcript_QC.xls log (make a note under "General" tab to say you performed the checks, which files you checked, and then make more specific notes on what you edited under that subject’s tab).
+**Edit any discrepancies** noticed in those ~20 files, and keep record of these checks and edits in the transcript_QC.xls log (make a note under "General" tab to say you performed the checks, which files you checked, and then make more specific notes on what you edited under that subject’s tab).
 
 After completing the spot-checking / editing process above:
 1. **Upload all transcripts for the subject to PHOENIX**. These edited .txt files should be saved in `/ncf/cnl03/PHOENIX/PROTECTED/*study*/*subject*/phone/processed/audio/transcripts/transcript_data/`
@@ -307,3 +307,29 @@ Generally, the entire job takes ~6-7 minutes:
 * Txt to csv: ~2.5 minutes
 * Transcript QC:  <1 minute
 * NLP feature extraction: ~4 minutes
+
+
+#### Analyze transcript QC pipeline outputs to identify potentially problematic transcripts <a name="analyzetrans"></a>
+
+Download the transcript_QC.csv and the NLPFeaturesSummary.csv files for the subject to your local computer.
+
+After getting all output files from the transcript QC pipeline, we move to R (3_DIARIES_transcript_NLP_QC_viz.R script) to generate visualizations (subject-level time series and correlation plots) of the computed QC and NLP metrics to flag transcripts with potential issues (e.g., implausibly fast speaking rate due to timestamp error, unusual number of inaudible marks) and fix the errors where possible. Unless we run into an empty file or other clearly unusable file, at this stage we are not making any decisions about exclusion of specific files (e.g., we are not excluding transcripts based on a high number of inaudible marks). The idea is to fix as many inaudible files as possible (within reason) and catch any potential issues we might have introduced through the automated pipelines.
+Timeseries plots for quality inspection
+
+The **3_DIARIES_transcript_NLP_QC_viz.R** script compiles output files from the audio QC, transcript QC, and NLP features part of the pipeline and generates subject-level timeseries plots, as well as correlation plots, of a subset of features that we use to identify problematic files. Specifically, one subject at a time, we inspect the timeseries plots paying special attention to deviations in the following metrics:
+
+Number of observations included in the plot. It should be the same as the number of transcripts we uploaded to the cluster.
+* Volume: Note the “quietest” diary (lowest volume) – is the audio file still audible? Does it include prolonged moments of silence?
+* Word count: What is the lowest word count of any transcript? Does this diary contain any prolonged moments of silence or any technical glitches? 
+* Speaking rate: Any implausibly fast (higher number) speaking rates? Could this be due to errors in the sentence-level timestamps? E.g., sometimes the transcribers will erroneously assign the same timestamp to two consecutive sentences, or two sentences will show only a few milliseconds difference, even though the subject spoke a full sentence. If a timestamp error is noticed, it should be manually fixed and noted in the transcript_QC_log.xls.
+* Inaudible: Identify outliers in number of inaudible marks by using the subject’s full distribution of inaudible marks (Q3 + 1.5*IQR). Any file that qualifies as outlier following this formula should be reviewed—check the transcription against the audio file and try to fix as many inaudible marks as possible. Any file that was inspected and edited should be noted in transcript_QC_log.xls.
+* Number of speakers: Each diary should only contain the voice of the participant. Sometimes a diary will contain dialogue from a person other than the participant. Sometimes it’s background noise/voice of someone passing by, and sometimes it is evidence of the participant recording the diary while in the company of other people, which participants were instructed not to do. This happens very rarely. 
+
+All files that were manually inspected based on the observations above should be noted in transcript_QC_log.xls, including notes on any edits that were made.
+
+After completing this first inspection process for a given subject: 
+1. Reupload the transcripts to PHOENIX (assuming edits were made), 
+2. Re-run the whole transcript / NLP pipeline for that subject (from csv conversion onwards)
+3. Re-download all pipeline outputs
+4. Generate updated time series visualizations. The updated time series plots should be inspected once more to ensure all issues identified were fixed successfully, and to check whether any additional errors remain (in which case the entire process described above should be repeated yet again).
+
